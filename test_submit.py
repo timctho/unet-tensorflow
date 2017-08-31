@@ -20,10 +20,10 @@ def CloseInContour( mask, element ):
     closing = cv2.morphologyEx(result, cv2.MORPH_CLOSE, element)
     for x in range(mask.shape[0]):
         for y in range(mask.shape[1]):
-             pt = cv2.pointPolygonTest(c, (x, y), True)
-             #pt = cv2.pointPolygonTest(c, (x, y), False)
-             if pt > 3:
-                result[x][y] = closing[x][y]
+             #pt = cv2.pointPolygonTest(c, (x, y), True)
+             pt = cv2.pointPolygonTest(c, (x, y), False)
+             if pt == 1:
+                 result[x][y] = closing[x][y]
     return result.astype(np.float32)
 
 
