@@ -10,6 +10,22 @@ def dice(pred_mask, gt_mask):
     intersection = np.sum(np.multiply(pred_mask, gt_mask))
     return (2 * intersection) / (np.sum(pred_mask) + np.sum(gt_mask))
 
+def CloseInContour( mask, element ):
+    large = 0
+    result = mask
+    _, contours, _ = cv2.findContours(result,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    #find the biggest area
+    c = max(contours, key = cv2.contourArea)
+
+    closing = cv2.morphologyEx(result, cv2.MORPH_CLOSE, element)
+    for x in range(mask.shape[0]):
+        for y in range(mask.shape[1]):
+             pt = cv2.pointPolygonTest(c, (x, y), True)
+             #pt = cv2.pointPolygonTest(c, (x, y), False)
+             if pt > 3:
+                result[x][y] = closing[x][y]
+    return result.astype(np.float32)
+
 
 input_size = 1024
 batch_size = 10
@@ -59,6 +75,10 @@ def run_length_encode(mask):
 rles = []
 
 dice_sum = 0
+# for closing operator
+closing_sum = 0
+element = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
 print('Predicting on {} samples with batch_size = {}...'.format(len(ids_test), batch_size))
 for start in range(0, len(ids_test), batch_size):
     print(start)
@@ -90,10 +110,19 @@ for start in range(0, len(ids_test), batch_size):
         dice_sum += dice(mask, gt)
         cv2.imshow('m', (mask * 255).astype(np.uint8))
         cv2.waitKey(0)
+        
+        # for closing operator
+        closing = CloseInContour((mask * 255).astype(np.uint8), element)
+        closing = closing.astype(np.float32)
+        closing = closing / 255
+        closing_sum += dice(closing, gt)
+        print("dice(closing, gt)")
+        print(dice(closing, gt))
 
         rle = run_length_encode(mask)
         rles.append(rle)
 print('mean dice: {}'.format(dice_sum / 5088))
+print('mean closing dice: {}'.format( closing_sum / 5088))
 print("Generating submission file...")
 df = pd.DataFrame({'img': names, 'rle_mask': rles})
 df.to_csv('submit/submission.csv.gz', index=False, compression='gzip')
