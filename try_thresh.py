@@ -27,6 +27,7 @@ def search_thresh(thread_name):
     gt_mask_dir = 'D:\Datasets_HDD\Carvana\output_masks'
 
 
+
     # start trying threshold
     while True:
         # random threshold
@@ -50,6 +51,7 @@ def search_thresh(thread_name):
             # data paths
             pred_npy_path = os.path.join(pred_npy_dir, img_name+'.jpg.npy')
             flip_pred_npy_path = os.path.join(flip_pred_npy_dir, 'flip_'+img_name+'.jpg.npy')
+
 
             # read data
             pred_npy = np.load(pred_npy_path)
@@ -89,10 +91,8 @@ if __name__ == '__main__':
     thread2 = threading.Thread(target=search_thresh, name='thread2', args=['thread2'])
     thread3 = threading.Thread(target=search_thresh, name='thread3', args=['thread3'])
     thread4 = threading.Thread(target=search_thresh, name='thread4', args=['thread4'])
-    thread5 = threading.Thread(target=search_thresh, name='thread5', args=['thread5'])
 
     thread1.start()
     thread2.start()
     thread3.start()
     thread4.start()
-    thread5.start()
