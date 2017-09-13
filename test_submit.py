@@ -34,7 +34,7 @@ batch_size = 1
 orig_width = 1918
 orig_height = 1280
 # threshold = 0.4
-model = UNet(1024)
+model = UNet(input_size)
 
 # df_test = pd.read_csv('input/sample_submission.csv')
 df_test = pd.read_csv('input/train_masks.csv')
@@ -52,8 +52,8 @@ sess.run(tf.global_variables_initializer())
 
 
 model_file = 'w_contour-360000'
-if not os.path.exists('model_training_predictions/{}'.format(model_file)):
-    os.mkdir('model_training_predictions/{}'.format(model_file))
+if not os.path.exists('model_training_predictions/{}-{}-hq'.format(model_file, input_size)):
+    os.mkdir('model_training_predictions/{}-{}-hq'.format(model_file, input_size))
 saver.restore(sess, 'model\\{}'.format(model_file))
 print('model loaded')
 
@@ -110,7 +110,7 @@ for i in range(1):
 
         for id in ids_test_batch.values:
             img_name = '{}.jpg'.format(id)
-            img = cv2.imread('D:\Datasets_HDD\Carvana\\train\\{}.jpg'.format(id))
+            img = cv2.imread('D:\Datasets_HDD\Carvana\\train_hq\\{}.jpg'.format(id))
             img = cv2.resize(img, (input_size, input_size))
             mask = cv2.imread('D:\Datasets_HDD\Carvana\\output_masks\\{}_mask.png'.format(id), 0)
             mask = mask.astype(np.float32)
@@ -139,8 +139,8 @@ for i in range(1):
             prob_fuse = (prob+np.fliplr(prob_flip)) / 2.0
             mask = (prob_fuse > thresh).astype(np.float32)
 
-            np.save('model_training_predictions\\{}\\{}'.format(model_file, img_name), prob)
-            np.save('model_training_predictions\\{}\\flip_{}'.format(model_file, img_name), prob_flip)
+            np.save('model_training_predictions\\{}-1280\\{}'.format(model_file, img_name), prob)
+            np.save('model_training_predictions\\{}-1280\\flip_{}'.format(model_file, img_name), prob_flip)
 
 
             # For closing
